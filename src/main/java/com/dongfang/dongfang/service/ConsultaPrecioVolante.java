@@ -8,28 +8,35 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
 
-
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+
 @Service
 public class ConsultaPrecioVolante {
 
     private Sheets service;
     private String spreadsheetId;
 
-    public ConsultaPrecioVolante(
-            @Value("${google.spreadsheet.id}") String spreadsheetId,
-            @Value("${google.credentials.path}") Resource credentialsResource
-    ) throws Exception {
+
+    public ConsultaPrecioVolante(@Value("${google.spreadsheet.id}") String spreadsheetId) throws Exception {
         this.spreadsheetId = spreadsheetId;
 
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-        GoogleCredentials credentials = GoogleCredentials.fromStream(credentialsResource.getInputStream())
+
+        // Leer el JSON completo desde Environment Variable
+        String jsonContent = System.getenv("GOOGLE_SHEETS_CREDENTIALS");
+        if (jsonContent == null) {
+            throw new IllegalStateException("La variable GOOGLE_SHEETS_CREDENTIALS no está definida");
+        }
+
+        InputStream credentialsStream = new ByteArrayInputStream(jsonContent.getBytes());
+
+        GoogleCredentials credentials = GoogleCredentials.fromStream(credentialsStream)
                 .createScoped(Collections.singleton("https://www.googleapis.com/auth/spreadsheets"));
 
         service = new Sheets.Builder(
@@ -40,14 +47,13 @@ public class ConsultaPrecioVolante {
                 .build();
     }
 
+
     public String obtenerValorPorCantidadYColumnas(Volante volante) throws Exception {
         int cantidad = volante.getCantidad();
 
-        // Si termina en 000, buscamos directamente
         if (cantidad % 1000 == 0) {
             return buscarPrecioExacto(cantidad, volante);
         } else {
-            // Calculamos superior e inferior
             int superior = ((cantidad / 1000) + 1) * 1000;
             int inferior = (cantidad / 1000) * 1000;
 
@@ -55,23 +61,20 @@ public class ConsultaPrecioVolante {
             String precioInferiorStr = buscarPrecioExacto(inferior, volante);
 
             if (precioSuperiorStr == null || precioInferiorStr == null) {
-                return null; // no se encontró algún precio
+                return null;
             }
 
             try {
                 double precioSuperior = Double.parseDouble(precioSuperiorStr.replaceAll("[^0-9.]", ""));
                 double precioInferior = Double.parseDouble(precioInferiorStr.replaceAll("[^0-9.]", ""));
-
-                // interpolación lineal
                 double precioInterpolado = precioInferior + (precioSuperior - precioInferior) * (cantidad - inferior) / (superior - inferior);
                 return String.valueOf((int) Math.round(precioInterpolado));
             } catch (Exception e) {
-                return null; // error en parseo
+                return null;
             }
         }
     }
 
-    // Nuevo método para buscar precio exacto dado un número de cantidad
     private String buscarPrecioExacto(int cantidad, Volante volante) throws Exception {
         String rango = "Volantes!A1:Z50";
         ValueRange response = service.spreadsheets().values().get(spreadsheetId, rango).execute();
