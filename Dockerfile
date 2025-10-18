@@ -1,28 +1,35 @@
-# Etapa de build
-FROM maven:3.9.3-eclipse-temurin-19 AS builder
+# Stage 1: construir el jar
+FROM openjdk:19-jdk-slim AS builder
 
 WORKDIR /app
 
-# Copiar pom y código fuente
-COPY pom.xml .
-COPY src ./src
-COPY mvnw .
+# Copiar Maven wrapper y pom.xml primero
+COPY mvnw mvnw
 COPY .mvn .mvn
+COPY pom.xml pom.xml
 
-# Build del jar (sin tests)
+# Copiar código fuente
+COPY src src
+
+# Dar permisos a mvnw y compilar jar
+RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
-# Etapa final
+# Stage 2: imagen final
 FROM eclipse-temurin:19-jdk
 
 WORKDIR /app
 
-# Copiar el jar generado en la etapa builder
-COPY --from=builder /app/target/*.jar app.jar
+# Copiar el jar compilado del stage builder y renombrarlo a app.jar
+COPY --from=builder /app/target/dongfang-0.0.1-SNAPSHOT.jar app.jar
 
-# Puerto que Render asignará
+# Puerto que Render asigna
 ENV PORT=8080
 EXPOSE $PORT
 
-# Ejecutar el jar
+# Variable de entorno con credenciales de Google Sheets
+# REEMPLAZÁ el valor por tu JSON completo de credenciales
+# Render permite definirla en Environment → Add Environment Variable
+ENV GOOGLE_SHEETS_CREDENTIALS="{}"
+
 ENTRYPOINT ["java","-jar","/app/app.jar"]
