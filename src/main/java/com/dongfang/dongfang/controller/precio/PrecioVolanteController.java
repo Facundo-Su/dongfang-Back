@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/precio/Volante")
-@CrossOrigin(origins = "http://localhost:5173/")
+@CrossOrigin(origins = "https://dongfang-front.onrender.com")
 public class PrecioVolanteController {
 
     @Autowired
