@@ -7,19 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
 
-
 @Service
 public class ChatService {
 
     private final Map<String, List<Mensaje>> mensajesPorUsuario = new ConcurrentHashMap<>();
+    private static final int MAX_MENSAJES = 50; // límite de mensajes por usuario
 
     OpenAIClient client = OpenAIOkHttpClient.fromEnv();
 
@@ -32,6 +30,11 @@ public class ChatService {
         List<Mensaje> historial = mensajesPorUsuario.get(mensajeUsuario.getIdUser());
 
         historial.add(mensajeUsuario);
+
+        // Limitar la lista a los últimos MAX_MENSAJES
+        if (historial.size() > MAX_MENSAJES) {
+            historial.subList(0, historial.size() - MAX_MENSAJES).clear();
+        }
 
         List<Mensaje> ultimosMensajes = historial.stream()
                 .skip(Math.max(0, historial.size() - 20))
@@ -46,10 +49,10 @@ public class ChatService {
                 "3. No agregues explicaciones ni saludos, pero permite que la pregunta cambie según lo que el usuario ya dijo.\n" +
                 "4. Si no se identifica un producto, formula una **pregunta breve diferente** que guíe al usuario.\n"+
                 "\n" +
-                "Historial reciente:"
-                + ultimosMensajes.stream()
-                .map(m -> m.getRole() + ": " + m.getMensaje())
-                .reduce("", (a,b) -> a + "\n" + b);
+                "Historial reciente:" +
+                ultimosMensajes.stream()
+                        .map(m -> m.getRole() + ": " + m.getMensaje())
+                        .reduce("", (a,b) -> a + "\n" + b);
 
         ResponseCreateParams params = ResponseCreateParams.builder()
                 .input(prompt)
@@ -67,6 +70,11 @@ public class ChatService {
 
         Mensaje mensajeRobot = new Mensaje("assistant", sb.toString());
         historial.add(mensajeRobot);
+
+        // Limitar de nuevo después de agregar el mensaje del asistente
+        if (historial.size() > MAX_MENSAJES) {
+            historial.subList(0, historial.size() - MAX_MENSAJES).clear();
+        }
 
         System.out.println("ID Usuario: " + mensajeUsuario.getIdUser());
         System.out.println("Historial actual: " + historial.size() + " mensajes");
