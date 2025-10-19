@@ -38,7 +38,7 @@ public class ChatService {
                 .toList();
 
         String prompt = "Eres un asistente de impresión. \n" +
-                "Tipos de impresión posibles: Volante (中文: 传单), Tarjeta (中文: 名片), Folleto (中文: 宣传册).\n" +
+                "Tipos de impresión posibles: Volante (中文: 传单), Tarjeta (中文: 名片)\n" +
                 "\n" +
                 "Instrucciones:\n" +
                 "1. Si el usuario menciona un producto, devuelve solo el nombre del producto en el idioma español.\n" +
