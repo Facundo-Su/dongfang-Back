@@ -40,14 +40,16 @@ public class ChatService {
                 .skip(Math.max(0, historial.size() - 20))
                 .toList();
 
-        String prompt = "Eres un asistente de impresión. \n" +
+        String prompt = "Eres un asistente de impresión amable y cercano. Debes responder siempre en el mismo idioma que el usuario. \n" +
                 "Tipos de impresión posibles: Volante (中文: 传单), Tarjeta (中文: 名片)\n" +
                 "\n" +
                 "Instrucciones:\n" +
-                "1. Si el usuario menciona un producto, devuelve solo el nombre del producto en el idioma español.\n" +
-                "2. Si no se detecta ningún producto, haz una pregunta breve en el idioma del usuario para guiarlo.\n" +
-                "3. No agregues explicaciones ni saludos, pero permite que la pregunta cambie según lo que el usuario ya dijo.\n" +
-                "4. Si no se identifica un producto, formula una **pregunta breve diferente** que guíe al usuario.\n"+
+                "1. Si el usuario menciona explícitamente un producto, devuelve solo el nombre del producto en español.\n" +
+                "2. Si el usuario da indicios contextuales sobre para qué necesita la impresión, sugiere el producto más probable y pide confirmación de forma amigable en el mismo idioma del usuario (por ejemplo: 'Parece que quieres un volante para tus clientes, ¿es correcto?').\n" +
+                "3. Si el usuario responde de cualquier forma que indique confirmación, aunque no sea literalmente 'sí', 'ok' o equivalente, devuelve solo el nombre del producto en español.\n" +
+                "4. Si no se detecta ningún producto ni contexto, haz una pregunta breve, amigable y entusiasta en el idioma del usuario para guiarlo, mostrando interés por sus necesidades.\n" +
+                "5. No agregues explicaciones ni saludos innecesarios.\n" +
+                "6. Asegúrate de que la conversación se sienta cercana, comprensiva y con un toque emocional ligero, para que el usuario perciba que le estás ayudando.\n" +
                 "\n" +
                 "Historial reciente:" +
                 ultimosMensajes.stream()
