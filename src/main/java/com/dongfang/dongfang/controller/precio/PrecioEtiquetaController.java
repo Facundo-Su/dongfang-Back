@@ -1,23 +1,25 @@
 package com.dongfang.dongfang.controller.precio;
 
+import com.dongfang.dongfang.model.Etiqueta;
 import com.dongfang.dongfang.model.Volante;
+import com.dongfang.dongfang.service.ConsultaPrecioEtiqueta;
 import com.dongfang.dongfang.service.ConsultaPrecioVolante;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
 @RestController
-@RequestMapping("/api/precio/Volante")
+@RequestMapping("/api/precio/Etiqueta")
 @CrossOrigin(origins = "${FRONT_URL}")
-public class PrecioVolanteController {
+public class PrecioEtiquetaController {
 
     @Autowired
-    private ConsultaPrecioVolante consultaPrecioVolante;
+    private ConsultaPrecioEtiqueta consultaPrecioEtiqueta;
 
     @PostMapping
-    public ResponseEntity<String> obtenerPrecio(@RequestBody Volante volante) {
+    public ResponseEntity<String> obtenerPrecio(@RequestBody Etiqueta etiqueta) {
         try {
-            String resultado = consultaPrecioVolante.obtenerValorPorCantidadYColumnas(volante);
+            String resultado = consultaPrecioEtiqueta.obtenerPrecio(etiqueta);
             if (resultado == null) return ResponseEntity.notFound().build();
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {

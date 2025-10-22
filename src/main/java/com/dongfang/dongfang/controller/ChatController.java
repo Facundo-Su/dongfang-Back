@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
-@CrossOrigin(origins = "https://dongfang-front.onrender.com")
+@CrossOrigin(origins = "${FRONT_URL}")
 public class ChatController {
 
     private final ChatService chatService;
