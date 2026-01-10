@@ -1,5 +1,6 @@
 # Stage 1: construir el jar
-FROM openjdk:19-jdk-slim AS builder
+FROM eclipse-temurin:19-jdk AS builder
+
 
 WORKDIR /app
 
