@@ -7,6 +7,7 @@ import com.dongfang.dongfang.service.ConsultaPrecioVolante;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/precio/Etiqueta")
@@ -23,7 +24,10 @@ public class PrecioEtiquetaController {
             if (resultado == null) return ResponseEntity.notFound().build();
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }
+
+
 }

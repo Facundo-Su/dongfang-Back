@@ -1,5 +1,8 @@
 package com.dongfang.dongfang.model;
 
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class Etiqueta {
     // Atributos
     private double ancho;   // en cm
